@@ -25,20 +25,6 @@ The application operates as a single-process reactive loop decoupled from the UI
   * *Current Implementation*: Rasterization and IPC serialization execute on `Dispatchers.Main` every 500 ms, allocating 65.5 KiB per bitmap (an allocation rate of 128 KiB/s managed by ART's generational garbage collector without explicit `Bitmap.recycle()` calls or object pooling).
   * *Known Limitations & Planned Refactoring*: Commit `0ff5fad` contains an incomplete work-in-progress integration of `SpeedWidgetProvider` (missing `@layout/widget_speed` and `@xml/widget_info` resources, a duplicate `startUpdatingSpeed()` declaration in `SpeedMonitorService.kt`, and a stripped `<manifest>` root tag). Furthermore, reusing a single mutable `Bitmap` buffer and pre-allocated `Paint` instances on `Dispatchers.Default` is planned to eliminate per-tick heap allocations.
 
-## Benchmarks & Technical Specifications
-
-| Metric / Parameter | Value / Specification | Source / Measurement Context |
-| :--- | :--- | :--- |
-| Polling Frequency | 2 Hz (`delay(500)` ms) | `SpeedMonitorService.kt` |
-| Sliding Window Duration | 3000 ms (~7 samples in memory) | `SpeedCalculator.kt` |
-| Eviction Complexity | O(n) per tick (n <= 8), O(1) amortized | `ArrayList.removeAll` |
-| Icon Buffer Footprint | 65,536 B (128x128 px, `ARGB_8888`) | `IconGenerator.kt` |
-| Heap Allocation Rate (Bitmaps) | 131,072 B/s (128 KiB/s) | Derived at 2 Hz polling |
-| Main-Thread Tick Execution Time | `[INSERT: e.g., 1.2 ms avg / 2.8 ms p99 via Perfetto]` | `[INSERT: Device & Android API level]` |
-| Battery Drain Overhead | `[INSERT: e.g., < 0.4% / hour]` | `[INSERT: Test conditions]` |
-| Debug APK Size | 24,077,532 B (~23.0 MiB) | Unminified build artifact |
-| Release APK Size | 17,972,211 B (~17.1 MiB) | `isMinifyEnabled = false` (`[INSERT: R8 size]`) |
-
 ## Build & Usage
 
 ### Prerequisites
